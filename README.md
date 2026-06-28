@@ -52,7 +52,19 @@ npm run lint     # ESLint
 | `stage` | Pre-release testing | Staging environment |
 | `main` | Production releases | Production |
 
-Typical flow: `develop` → `stage` → `main`.
+All changes must follow this release flow:
+
+1. Commit and push to **`develop`**
+2. Open a **PR: `develop` → `stage`**, review, and merge
+3. Open a **PR: `stage` → `main`**, review, and merge
+
+Do not push directly to `stage` or `main`, and do not skip `stage` when promoting to production.
+
+```text
+develop  --PR-->  stage  --PR-->  main
+   |                 |              |
+ preview          staging       production
+```
 
 ## Deploy to Vercel
 
