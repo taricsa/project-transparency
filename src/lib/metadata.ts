@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { PageMeta } from "@/lib/types";
-import { buildOgImagePath, getSiteUrl } from "@/lib/site-url";
+import { buildOgImagePath } from "@/lib/site-url";
 
 const SITE_NAME = "[Project-Transparency]";
 
@@ -18,7 +18,7 @@ export function buildPageMetadata(page: PageMeta): Metadata {
       title: page.title,
       description: page.description,
       type: "website",
-      url: page.path === "/" ? getSiteUrl() : `${getSiteUrl()}${page.path}`,
+      url: page.path,
       images: [{ url: ogImage, width: 1200, height: 630, alt: page.title }],
     },
     twitter: {
