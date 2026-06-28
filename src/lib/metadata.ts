@@ -1,20 +1,15 @@
 import type { Metadata } from "next";
 import type { PageMeta } from "@/lib/types";
-import { getSiteUrl } from "@/lib/site-url";
+import { buildOgImagePath } from "@/lib/site-url";
 
 const SITE_NAME = "[Project-Transparency]";
 
 export function buildPageMetadata(page: PageMeta): Metadata {
-  const ogParams = new URLSearchParams({
+  const ogImage = buildOgImagePath({
     title: page.ogTitle,
     page: page.path.replace("/", "") || "home",
+    metric: page.ogMetric,
   });
-
-  if (page.ogMetric) {
-    ogParams.set("metric", page.ogMetric);
-  }
-
-  const ogImage = `${getSiteUrl()}/api/og?${ogParams.toString()}`;
 
   return {
     title: `${page.title} | ${SITE_NAME}`,
@@ -23,6 +18,7 @@ export function buildPageMetadata(page: PageMeta): Metadata {
       title: page.title,
       description: page.description,
       type: "website",
+      url: page.path,
       images: [{ url: ogImage, width: 1200, height: 630, alt: page.title }],
     },
     twitter: {
@@ -51,6 +47,6 @@ export const homePageMeta: PageMeta = {
   description:
     "Peer-to-peer guide for Canadian teens — understand pads, pods, cups, and what product contact means for your body.",
   ogTitle: "Pad/Pod Lexicon",
-  ogMetric: "11,000–17,000 products",
+  ogMetric: "11,000-17,000 products",
   path: "/",
 };

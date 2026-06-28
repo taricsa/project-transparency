@@ -2,7 +2,7 @@ import { DM_Sans } from "next/font/google";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { siteConfig } from "@/lib/metadata";
-import { getSiteUrl } from "@/lib/site-url";
+import { buildOgImagePath, getSiteUrl } from "@/lib/site-url";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -21,7 +21,11 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: `${getSiteUrl()}/api/og?title=Project-Transparency&page=home&metric=Open%20source%20guide`,
+        url: buildOgImagePath({
+          title: "Project-Transparency",
+          page: "home",
+          metric: "Open source guide",
+        }),
         width: 1200,
         height: 630,
         alt: siteConfig.name,
