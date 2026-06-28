@@ -28,12 +28,14 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Optional: set `NEXT_PUBLIC_SITE_URL` for correct OG image URLs in production metadata.
+Optional: set `NEXT_PUBLIC_SITE_URL` for correct OG image URLs when sharing links (required for iMessage, Slack, etc.).
 
 ```bash
 # .env.local
-NEXT_PUBLIC_SITE_URL=https://your-domain.vercel.app
+NEXT_PUBLIC_SITE_URL=https://project-transparency-psi.vercel.app
 ```
+
+On Vercel, add the same variable to the **Production** environment (Settings → Environment Variables). Without it, `og:image` may point at a private deployment URL that link previews cannot fetch.
 
 ## Scripts
 
