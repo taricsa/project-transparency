@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #fdfbf7;
+  --color-foreground: #2c3630;
+  --color-primary: #a3b899;
+  --color-accent: #d98a6c;
+  --color-muted: #e8e4dc;
+  --color-card: #ffffff;
+  --color-primary-foreground: #2c3630;
+  --color-accent-foreground: #ffffff;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  ::selection {
+    @apply bg-primary/40 text-foreground;
+  }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
