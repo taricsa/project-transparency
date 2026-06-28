@@ -28,14 +28,21 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Optional: set `NEXT_PUBLIC_SITE_URL` for correct OG image URLs when sharing links (required for iMessage, Slack, etc.).
+### Site URL (optional on Vercel production)
+
+Production builds on Vercel automatically use `VERCEL_PROJECT_PRODUCTION_URL` for Open Graph link previews (iMessage, Slack, etc.). You do **not** need to set anything extra for the default `*.vercel.app` domain.
+
+Set `NEXT_PUBLIC_SITE_URL` only when you need to override that behavior:
+
+| When | Example |
+|------|---------|
+| **Custom domain** | `https://projecttransparency.ca` |
+| **Local OG testing** | `https://project-transparency-psi.vercel.app` in `.env.local` |
 
 ```bash
-# .env.local
+# .env.local (optional — for local testing of share previews)
 NEXT_PUBLIC_SITE_URL=https://project-transparency-psi.vercel.app
 ```
-
-On Vercel, add the same variable to the **Production** environment (Settings → Environment Variables). Without it, `og:image` may point at a private deployment URL that link previews cannot fetch.
 
 ## Scripts
 
@@ -71,8 +78,8 @@ develop  --PR-->  stage  --PR-->  main
 ## Deploy to Vercel
 
 1. Import the GitHub repository in Vercel.
-2. Set `NEXT_PUBLIC_SITE_URL` to your production URL.
-3. Map branches: `main` → Production, `stage` → Staging, `develop` → Preview.
+2. Map branches: `main` → Production, `stage` → Staging, `develop` → Preview.
+3. **If you add a custom domain**, set `NEXT_PUBLIC_SITE_URL` to that domain in the **Production** environment (Settings → Environment Variables). Skip this step for the default Vercel URL.
 
 ```bash
 npx vercel link
