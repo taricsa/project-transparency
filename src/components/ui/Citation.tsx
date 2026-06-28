@@ -1,3 +1,5 @@
+"use client";
+
 import { getSourceLabel } from "@/content/sources";
 
 interface CitationProps {
