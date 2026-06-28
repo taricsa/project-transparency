@@ -11,23 +11,59 @@ import { CitationsInline } from "@/components/ui/Citation";
 
 const STORAGE_KEY = "pt-checklist-v1";
 const CHECKLIST_EVENT = "pt-checklist-change";
+const EMPTY_CHECKLIST: Record<string, boolean> = {};
+
+let cachedRaw: string | null = null;
+let cachedSnapshot: Record<string, boolean> = EMPTY_CHECKLIST;
 
 function readChecklist(): Record<string, boolean> {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? (JSON.parse(stored) as Record<string, boolean>) : {};
+    const raw = localStorage.getItem(STORAGE_KEY);
+
+    if (raw === cachedRaw) {
+      return cachedSnapshot;
+    }
+
+    cachedRaw = raw;
+
+    if (!raw) {
+      cachedSnapshot = EMPTY_CHECKLIST;
+      return cachedSnapshot;
+    }
+
+    cachedSnapshot = JSON.parse(raw) as Record<string, boolean>;
+    return cachedSnapshot;
   } catch {
-    return {};
+    cachedRaw = null;
+    cachedSnapshot = EMPTY_CHECKLIST;
+    return cachedSnapshot;
   }
 }
 
+function invalidateChecklistCache() {
+  cachedRaw = null;
+}
+
+function writeChecklist(next: Record<string, boolean>) {
+  const raw = JSON.stringify(next);
+  localStorage.setItem(STORAGE_KEY, raw);
+  cachedRaw = raw;
+  cachedSnapshot = next;
+  window.dispatchEvent(new Event(CHECKLIST_EVENT));
+}
+
 function subscribe(callback: () => void) {
-  window.addEventListener(CHECKLIST_EVENT, callback);
-  window.addEventListener("storage", callback);
+  const onStoreChange = () => {
+    invalidateChecklistCache();
+    callback();
+  };
+
+  window.addEventListener(CHECKLIST_EVENT, onStoreChange);
+  window.addEventListener("storage", onStoreChange);
 
   return () => {
-    window.removeEventListener(CHECKLIST_EVENT, callback);
-    window.removeEventListener("storage", callback);
+    window.removeEventListener(CHECKLIST_EVENT, onStoreChange);
+    window.removeEventListener("storage", onStoreChange);
   };
 }
 
@@ -35,13 +71,11 @@ function useChecklistState() {
   const checked = useSyncExternalStore<Record<string, boolean>>(
     subscribe,
     readChecklist,
-    (): Record<string, boolean> => ({}),
+    () => EMPTY_CHECKLIST,
   );
 
   const setItemChecked = useCallback((id: string, value: boolean) => {
-    const next = { ...readChecklist(), [id]: value };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    window.dispatchEvent(new Event(CHECKLIST_EVENT));
+    writeChecklist({ ...readChecklist(), [id]: value });
   }, []);
 
   return { checked, setItemChecked };
