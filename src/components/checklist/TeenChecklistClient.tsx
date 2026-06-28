@@ -13,17 +13,17 @@ const STORAGE_KEY = "pt-checklist-v1";
 const CHECKLIST_EVENT = "pt-checklist-change";
 const EMPTY_CHECKLIST: Record<string, boolean> = {};
 
-let cachedRaw: string | null = null;
+let hasLoaded = false;
 let cachedSnapshot: Record<string, boolean> = EMPTY_CHECKLIST;
 
 function readChecklist(): Record<string, boolean> {
-  if (cachedRaw !== null) {
+  if (hasLoaded) {
     return cachedSnapshot;
   }
 
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    cachedRaw = raw;
+    hasLoaded = true;
 
     if (!raw) {
       cachedSnapshot = EMPTY_CHECKLIST;
@@ -33,20 +33,24 @@ function readChecklist(): Record<string, boolean> {
     cachedSnapshot = JSON.parse(raw) as Record<string, boolean>;
     return cachedSnapshot;
   } catch {
-    cachedRaw = null;
+    hasLoaded = true;
     cachedSnapshot = EMPTY_CHECKLIST;
     return cachedSnapshot;
   }
 }
 
 function invalidateChecklistCache() {
-  cachedRaw = null;
+  hasLoaded = false;
 }
 
 function writeChecklist(next: Record<string, boolean>) {
-  const raw = JSON.stringify(next);
-  localStorage.setItem(STORAGE_KEY, raw);
-  cachedRaw = raw;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // Keep checklist functional in memory when persistence is blocked or full.
+  }
+
+  hasLoaded = true;
   cachedSnapshot = next;
   window.dispatchEvent(new Event(CHECKLIST_EVENT));
 }
@@ -54,6 +58,10 @@ function writeChecklist(next: Record<string, boolean>) {
 function subscribe(callback: () => void) {
   const onStoreChange = (event: Event) => {
     if (event.type === "storage") {
+      const storageEvent = event as StorageEvent;
+      if (storageEvent.key !== null && storageEvent.key !== STORAGE_KEY) {
+        return;
+      }
       invalidateChecklistCache();
     }
     callback();
