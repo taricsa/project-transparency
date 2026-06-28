@@ -7,7 +7,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import { checklistHeading, checklistItems } from "@/content/checklist";
-import { CitationsInline } from "@/components/ui/Citation";
+import { getSourceLabel } from "@/content/sources";
 
 const STORAGE_KEY = "pt-checklist-v1";
 const CHECKLIST_EVENT = "pt-checklist-change";
@@ -17,13 +17,12 @@ let cachedRaw: string | null = null;
 let cachedSnapshot: Record<string, boolean> = EMPTY_CHECKLIST;
 
 function readChecklist(): Record<string, boolean> {
+  if (cachedRaw !== null) {
+    return cachedSnapshot;
+  }
+
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-
-    if (raw === cachedRaw) {
-      return cachedSnapshot;
-    }
-
     cachedRaw = raw;
 
     if (!raw) {
@@ -53,8 +52,10 @@ function writeChecklist(next: Record<string, boolean>) {
 }
 
 function subscribe(callback: () => void) {
-  const onStoreChange = () => {
-    invalidateChecklistCache();
+  const onStoreChange = (event: Event) => {
+    if (event.type === "storage") {
+      invalidateChecklistCache();
+    }
     callback();
   };
 
@@ -79,6 +80,25 @@ function useChecklistState() {
   }, []);
 
   return { checked, setItemChecked };
+}
+
+function ChecklistCitations({ ids }: { ids: number[] }) {
+  const uniqueIds = [...new Set(ids)];
+
+  return (
+    <sup className="ml-0.5 inline-flex gap-0.5 text-[0.65em] font-medium text-accent">
+      {uniqueIds.map((id) => (
+        <a
+          key={id}
+          href={`#source-${id}`}
+          className="underline-offset-2 hover:underline"
+          aria-label={`Citation ${id}: ${getSourceLabel(id)}`}
+        >
+          [{id}]
+        </a>
+      ))}
+    </sup>
+  );
 }
 
 export function TeenChecklistClient() {
@@ -123,7 +143,7 @@ export function TeenChecklistClient() {
                 <div className="flex-1">
                   <label htmlFor={inputId} className="cursor-pointer font-medium text-foreground">
                     {item.title}
-                    <CitationsInline ids={item.citations} />
+                    <ChecklistCitations ids={item.citations} />
                   </label>
                   <p className="mt-1 text-sm text-foreground/75">{item.summary}</p>
                   <button
