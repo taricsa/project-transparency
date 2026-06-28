@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { PageMeta } from "@/lib/types";
+import { getSiteUrl } from "@/lib/site-url";
 
 const SITE_NAME = "[Project-Transparency]";
 
@@ -13,7 +14,7 @@ export function buildPageMetadata(page: PageMeta): Metadata {
     ogParams.set("metric", page.ogMetric);
   }
 
-  const ogImage = `/api/og?${ogParams.toString()}`;
+  const ogImage = `${getSiteUrl()}/api/og?${ogParams.toString()}`;
 
   return {
     title: `${page.title} | ${SITE_NAME}`,
